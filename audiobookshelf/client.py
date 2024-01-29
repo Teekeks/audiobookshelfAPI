@@ -1,8 +1,6 @@
 from typing import Optional, List
 
 from aiohttp import ClientSession
-from pprint import pprint
-from audiobookshelf.data import User, Library, Author
 from audiobookshelf.helper import remove_none_values
 
 __all__ = ['ABSClient']
@@ -10,7 +8,7 @@ __all__ = ['ABSClient']
 
 class ABSClient:
 
-    user: Optional[User] = None
+    user: Optional[dict] = None
 
     def __init__(self, base_url: str):
         self.base_url = base_url
@@ -28,7 +26,7 @@ class ABSClient:
         async with ClientSession() as session:
             header = {}
             if req_auth:
-                header['Authorization'] = f'Bearer {self.user.token}'
+                header['Authorization'] = f'Bearer {self.user['token']}'
             result = await session.request(method, f'{self.base_url}{endpoint}', json=data, headers=header)
             if result.status != 200:
                 raise Exception(f'Raised Error {result.status}')
@@ -40,7 +38,7 @@ class ABSClient:
                                     'login',
                                     {'username': username, 'password': password},
                                     req_auth=False)
-        self.user = User(**data['user'])
+        self.user = data['user']
 
     # Libraries
 
@@ -54,7 +52,7 @@ class ABSClient:
                              disable_watcher: Optional[bool] = None,
                              skip_matching_media_with_asin: Optional[bool] = None,
                              skip_matching_media_with_isbn: Optional[bool] = None,
-                             auto_scan_cron_expression: Optional[str] = None) -> Library:
+                             auto_scan_cron_expression: Optional[str] = None) -> dict:
         settings = remove_none_values({
             'coverAspectRatio': (1 if cover_aspect_ratio else 0) if cover_aspect_ratio is not None else None,
             'disableWatcher': disable_watcher,
@@ -71,27 +69,27 @@ class ABSClient:
             'settings': settings
         })
         data = await self._api_call('POST', 'api/libraries', param)
-        return Library(**data)
+        return data
 
-    async def get_libraries(self) -> List[Library]:
+    async def get_libraries(self) -> dict:
         data = await self._api_call('GET', 'api/libraries', {})
-        return [Library(**data) for data in data['libraries']]
+        return data['libraries']
 
     async def get_library(self,
                           library_id: str,
-                          include: Optional[List[str]] = None) -> Library:
+                          include: Optional[List[str]] = None) -> List[dict]:
         param = remove_none_values({
             'include': ','.join(include) if include is not None else None
         })
         data = await self._api_call('GET', f'api/libraries/{library_id}', param)
-        return Library(**data['library'])
+        return data
 
     async def delete_library(self, library_id: str):
         await self._api_call('DELETE', f'api/libraries/{library_id}', {})
 
-    async def get_library_authors(self, library_id: str) -> List[Author]:
+    async def get_library_authors(self, library_id: str) -> dict:
         data = await self._api_call('GET', f'api/libraries/{library_id}/authors', {})
-        return [Author(**data) for data in data['authors']]
+        return data['authors']
 
     async def delete_author(self, author_id: str):
         await self._api_call('DELETE', f'api/authors/{author_id}', {}, return_result=False)
