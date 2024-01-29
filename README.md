@@ -25,11 +25,11 @@ async def run_test():
     await client.authorize(ABS_USER, ABS_PASSWORD)
     libs = await client.get_libraries()
     for lib in libs:
-        authors = await client.get_library_authors(lib.id)
+        authors = await client.get_library_authors(lib['id'])
         for author in authors:
-            if author.num_books == 0:
-                print(f'{author.name} in {lib.name} has no books, deleting...')
-                await client.delete_author(author.id)
+            if author['numBooks'] == 0:
+                print(f'{author['name']} in {lib['name']} has no books, deleting...')
+                await client.delete_author(author['id'])
 
 
 asyncio.run(run_test())
