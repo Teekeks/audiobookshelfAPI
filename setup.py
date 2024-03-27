@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 version = ''
 
-with open('twitchAPI/__init__.py') as f:
+with open('audiobookshelf/__init__.py') as f:
     for line in f.readlines():
         if line.startswith('__version__'):
             version = line.split('= \'')[-1][:-2].strip()
