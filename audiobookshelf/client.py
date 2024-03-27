@@ -1,7 +1,7 @@
 from typing import Optional, List
 
 from aiohttp import ClientSession
-from audiobookshelf.helper import remove_none_values
+from audiobookshelf.helper import remove_none_values, build_url
 
 __all__ = ['ABSClient']
 
@@ -93,3 +93,15 @@ class ABSClient:
 
     async def delete_author(self, author_id: str):
         await self._api_call('DELETE', f'api/authors/{author_id}', {}, return_result=False)
+
+    async def get_sessions_page(self, user_id: str, items_per_page: Optional[int] = None, page: Optional[int] = None) -> dict:
+        param = remove_none_values({
+            'user': user_id,
+            'itemsPerPage': items_per_page,
+            'page': page
+        })
+        data = await self._api_call('GET', build_url('api/sessions', param), {})
+        return data
+
+    async def get_user_year_stats(self, year: int) -> dict:
+        return await self._api_call('GET', f'api/me/stats/year/{year}', {})
