@@ -105,3 +105,25 @@ class ABSClient:
 
     async def get_user_year_stats(self, year: int) -> dict:
         return await self._api_call('GET', f'api/me/stats/year/{year}', {})
+
+    async def get_library_items(self,
+                                library_id: str,
+                                limit: Optional[int] = None,
+                                page: Optional[int] = None,
+                                sort: Optional[str] = None,
+                                desc: Optional[bool] = None,
+                                _filter: Optional[str] = None,
+                                minified: Optional[bool] = None,
+                                collapse_series: Optional[bool] = None,
+                                include: Optional[str] = None) -> dict:
+        param = remove_none_values({
+            'limit': limit,
+            'page': page,
+            'sort': sort,
+            'desc': desc,
+            'filter': _filter,
+            'minified': minified,
+            'collapseseries': collapse_series,
+            'include': include
+        })
+        return await self._api_call('GET', build_url(f'api/libraries/{library_id}/items', param), {})
